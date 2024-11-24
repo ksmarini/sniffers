@@ -35,8 +35,8 @@ class Device:
               filter=f'src host {self.targetip} and udp port 53')
 
     def dns(self, pkt):
-        record = pkt[DNS].qd.qname.decode('utf-8').strip('.')
-        time = strftime("%m%d%Y %H:%M:%S", localtime())
+        record = pkt[DNS].qd.qname.decode('utf-8') #.strip('.')
+        time = strftime("%d/%m/%Y %H:%M:%S", localtime())
         print(f'[{Fore.GREEN}{time} | {Fore.BLUE}{self.targetip} -> {Fore.RED}{record}{Style.RESET_ALL}]')
 
     def watch(self):
