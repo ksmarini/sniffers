@@ -5,6 +5,7 @@ from time import strftime, localtime, sleep
 from scapy.layers.l2 import arp_mitm, ARP, Ether
 from scapy.layers.dns import DNS
 from scapy.sendrecv import sniff, srp
+from mac_vendor_lookup import MacLookup, VendorNotFoundError
 
 
 parser = argparse.ArgumentParser(description='DNS Sniffer')
@@ -19,8 +20,13 @@ def arp_scan(network, iface):
     ans, _ = srp(Ether(dst="ff:ff:ff:ff:ff:ff")/ARP(pdst=network), timeout=5, iface=iface)
     print(f'{Fore.RED}########## NETWORK DEVICES ##########{Style.RESET_ALL}\n')
     for i in ans:
+        mac = i.answer[ARP].hwsrc
         ip = i.answer[ARP].psrc
-        print(f'{Fore.BLUE}{ip}{Style.RESET_ALL}')
+        try:
+            vendor = MacLookup().lookup(mac)
+        except VendorNotFoundError:
+            vendor = 'unrecognized device'
+        print(f'{Fore.BLUE}{ip}{Style.RESET_ALL} ({mac}, {vendor})')
     return input('\nPick a device IP: ')
 
 
