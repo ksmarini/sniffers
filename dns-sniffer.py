@@ -2,7 +2,9 @@ import argparse
 import threading
 from colorama import Fore, Style
 from time import strftime, localtime, sleep
-from scapy.all import arp_mitm, sniff, DNS
+from scapy.layers.l2 import arp_mitm, ARP
+from scapy.layers.dns import DNS
+from scapy.sendrecv import sniff
 
 
 parser = argparse.ArgumentParser(description='DNS Sniffer')
