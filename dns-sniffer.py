@@ -2,6 +2,7 @@ import argparse
 import threading
 from scapy.all import arp_mitm
 
+
 parser = argparse.ArgumentParser(description='DNS Sniffer')
 parser.add_argument('--targetip', help='Target device you want to watch.', required=True)
 parser.add_argument('--iface', help='Interface to use for attack', required=True)
