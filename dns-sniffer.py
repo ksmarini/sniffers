@@ -1,5 +1,6 @@
 import argparse
 import threading
+import sys
 from colorama import Fore, Style
 from time import strftime, localtime, sleep
 from scapy.layers.l2 import arp_mitm, ARP, Ether
@@ -62,6 +63,10 @@ class Device:
         t2.start()
 
 if __name__ == '__main__':
-    targetip = arp_scan(opts.network, opts.iface)
-    device = Device(opts.routerip, targetip, opts.iface)
-    device.watch()
+    try:
+        targetip = arp_scan(opts.network, opts.iface)
+        device = Device(opts.routerip, targetip, opts.iface)
+        device.watch()
+    except KeyboardInterrupt:
+        print('Exiting...')
+        sys.exit(2)
