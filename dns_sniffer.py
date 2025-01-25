@@ -1,26 +1,28 @@
 #!/usr/bin/env python3
 """ Simple MITM """
 import argparse
-import threading
 import sys
+import threading
 from colorama import Fore, Style
-from scapy.layers.l2 import arp_mitm, ARP, Ether
-from scapy.layers.dns import DNS
-from scapy.sendrecv import sniff, srp
 from mac_vendor_lookup import MacLookup, VendorNotFoundError
-
+from scapy.layers.dns import DNS
+from scapy.layers.l2 import ARP, Ether, arp_mitm
+from scapy.sendrecv import sniff, srp
 
 parser = argparse.ArgumentParser(description='DNS Sniffer')
-parser.add_argument('--network', help='Network to scan (eg. "10.255.73.0/24").', required=True)
-parser.add_argument('--iface', help='Interface to use for attack', required=True)
+parser.add_argument('--network', help='Network to scan (eg. "10.0.0.0/24").',
+                    required=True)
+parser.add_argument('--iface', help='Interface use for attack', required=True)
 parser.add_argument('--routerip', help='IP of your home router', required=True)
 
 opts = parser.parse_args()
 
 
 def arp_scan(network, iface):
-    ans, _ = srp(Ether(dst="ff:ff:ff:ff:ff:ff")/ARP(pdst=network), timeout=5, iface=iface)
-    print(f'{Fore.RED}########## NETWORK DEVICES ##########{Style.RESET_ALL}\n')
+    """ Function to Scan """
+    ans, _ = srp(Ether(dst="ff:ff:ff:ff:ff:ff")/ARP(pdst=network), timeout=5,
+                 iface=iface)
+    print(f'{Fore.RED}######### NETWORK DEVICES #########{Style.RESET_ALL}\n')
     for i in ans:
         mac = i.answer[ARP].hwsrc
         ip = i.answer[ARP].psrc
