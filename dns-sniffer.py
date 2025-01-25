@@ -1,8 +1,9 @@
+#!/usr/bin/env python3
+""" Simple MITM """
 import argparse
 import threading
 import sys
 from colorama import Fore, Style
-from time import strftime, localtime, sleep
 from scapy.layers.l2 import arp_mitm, ARP, Ether
 from scapy.layers.dns import DNS
 from scapy.sendrecv import sniff, srp
