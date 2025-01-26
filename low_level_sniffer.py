@@ -25,13 +25,14 @@ class Packet:
         self.ttl = header[5]
         self.pro = header[6]
         self.num = header[7]
-        self.src = header[8]
-        self.dst = header[9]
+        self.src = ipaddress.ip_address(header[8])
+        self.dst = ipaddress.ip_address(header[9])
 
-        self.src_addr = ipaddress.ip_address(self.src)
-        self.dst_addr = ipaddress.ip_address(self.dst)
+        #  self.src_addr = ipaddress.ip_address(self.src)
+        #  self.dst_addr = ipaddress.ip_address(self.dst)
 
-        self.protocol_map = {1: "ICMP"}
+        #  self.protocol_map = {1: "ICMP"}
+        self.protocol_map = {1: "ICMP", 6: "TCP", 17: "UDP"}
 
         try:
             self.protocol = self.protocol_map[self.pro]
@@ -41,7 +42,7 @@ class Packet:
 
     def print_header_short(self):
         """Print header"""
-        print(f'Protocol: {self.protocol} {self.src_addr} -> {self.dst_addr}')
+        print(f'Protocol: {self.protocol} {self.src} -> {self.dst}')
 
 
 def sniff(host):
